@@ -18,8 +18,3 @@ matr = st.text_input('Qual a matricula a ser pesquisada')
 if st.button('Pesquisa'):
     for matr in sentenciados.find({'matricula': matr}):
       st.write('Nome: ', matr['nome'],',', matr['pavilhao'])
-
-
-#matr = input('Matricula a ser pesquisada: ')
-#
-#  print(matr['pavilhao'])
