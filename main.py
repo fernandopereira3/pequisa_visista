@@ -3,7 +3,7 @@ from rich import print
 import pymongo
 from pymongo import MongoClient
 
-client = MongoClient('mongodb://10.14.180.204:27017/')
+client = MongoClient('mongodb://localhost:27017/')
 db = client.cpppac
 sentenciados = db.sentenciados
 
