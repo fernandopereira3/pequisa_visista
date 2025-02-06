@@ -28,6 +28,7 @@ share/python-wheels/
 etc/
 share/
 bin/
+*.cfg
 MANIFEST
 
 # PyInstaller
