@@ -34,43 +34,12 @@ def normalizar_texto(texto):
 
 # Função para buscar sentenciado por matrícula
 def buscar_por_matricula(matricula):
-    matricula_normalizada = normalizar_matricula(matricula)
-    
-    # Debug: Verificar o valor normalizado da matrícula
-    st.subheader("Debug: Matrícula Normalizada")
-    st.write(f"Matrícula normalizada: {matricula_normalizada}")
-    
-    # --- Verificando a busca exata ---
-    # Prepara a consulta MongoDB para a busca exata
+    matricula_normalizada = re.compile(f".*{campo_pesquisa}.*", re.IGNORECASE)
     consulta_exata = {'matricula': matricula_normalizada}
-    st.subheader("Debug: Consulta de Busca Exata")
-    st.json(consulta_exata)  # Exibe a consulta em formato JSON para verificar como ela é formada
-    
-    # Realiza a busca exata
+
     resultado = list(sentenciados.find(consulta_exata))
-
-    # Debug: Verificar se encontrou algo na busca exata
-    st.subheader("Debug: Resultado da Busca Exata")
-    st.json(resultado)
-
-    # --- Se não encontrar, faz a busca com regex ---
     if not resultado:
-        padrao_matricula = re.compile(f".*{matricula_normalizada}.*", re.IGNORECASE)
-  
-        # Prepara a consulta MongoDB para a busca com regex
-        resultado = list(sentenciados.find({'matricula': {'$regex': padrao_matricula}}))
-        #resultados = sentenciados.find({campo_busca: {'$regex': padrao}})
-
-        st.subheader("Debug: Consulta com Regex")
-        st.json(resultado)  # Exibe a consulta MongoDB com regex
-        
-        # Realiza a busca com regex
-        #resultado = list(sentenciados.find(consulta_regex))
-
-        # Debug: Verificar se encontrou algo com regex
-        st.subheader("Debug: Resultado da Busca com Regex")
-        st.json(resultado)
-
+        resultado = list(sentenciados.find({'matricula': {'$regex': matricula_normalizada}}))
     return resultado
 
 # Função para buscar sentenciado por nome
@@ -124,19 +93,15 @@ if col1.button('Pesquisar'):
                 st.markdown("---")  # Linha divisória
         else:
             st.warning('Nenhum sentenciado encontrado.')
-            st.subheader("Debug: Resultados da Pesquisa (vazio)")
-            st.json(resultados)  # Exibe JSON apenas se a busca estiver vazia
     else:
         st.warning('Digite um valor para pesquisar.')
 
 # Botão Adicionar à Lista (apenas para matrícula)
 if col2.button('Adicionar à Lista'):
-    if campo_pesquisa and tipo_busca == 'Matrícula':
+    if campo_pesquisa == True:
         adicionar_a_lista(campo_pesquisa)
-    elif tipo_busca == 'Nome':
-        st.info('A função de adicionar à lista só está disponível para matrícula.')
     else:
-        st.warning('Digite uma matrícula para adicionar à lista.')
+        st.warning('Somente matrículas podem ser adicionadas à lista !.')
 
 # Exibição da lista de sentenciados
 if st.session_state['sentenciados_lista']:
