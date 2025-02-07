@@ -10,11 +10,8 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client.cpppac
 sentenciados = db.sentenciados
 
-st.title('Pesquisa de Sentenciados')
+st.title('Lista de Sentenciados')
 
-# Barra lateral
-barra = st.sidebar
-barra.subheader('Pesquisa de Presos')
 
 # Inicializa a lista no session_state, se ainda não existir
 if 'sentenciados_lista' not in st.session_state:
@@ -50,10 +47,9 @@ def buscar_por_nome(nome):
 
 # Função para adicionar sentenciado à lista
 def adicionar_a_lista(matricula):
-    matricula_normalizada = normalizar_matricula(matricula)
-    
+    matricula_normalizada = re.compile(f".*{matricula}.*", re.IGNORECASE)
     # Busca exata no banco para melhor performance
-    sentenciado = sentenciados.find_one({'matricula': matricula_normalizada})
+    sentenciado = sentenciados.find_one({'matricula': {'$regex': matricula_normalizada}})
 
     if sentenciado:
         if sentenciado['matricula'] not in [s['matricula'] for s in st.session_state['sentenciados_lista']]:
@@ -66,8 +62,9 @@ def adicionar_a_lista(matricula):
         else:
             st.info('Esta matrícula já está na lista!')
     else:
-        st.warning('Sentenciado não encontrado.')
-
+        st.write(sentenciado)
+        st.warning('Sentenciado não encontrado! ')
+        
 # Escolha do tipo de busca
 tipo_busca = st.radio('Pesquisar por:', ['Matrícula', 'Nome'])
 
@@ -98,10 +95,11 @@ if col1.button('Pesquisar'):
 
 # Botão Adicionar à Lista (apenas para matrícula)
 if col2.button('Adicionar à Lista'):
-    if campo_pesquisa == True:
+    if campo_pesquisa != False:
         adicionar_a_lista(campo_pesquisa)
     else:
-        st.warning('Somente matrículas podem ser adicionadas à lista !.')
+        st.write(campo_pesquisa)
+        st.warning('Somente matrículas podem ser adicionadas na lista !.')
 
 # Exibição da lista de sentenciados
 if st.session_state['sentenciados_lista']:
