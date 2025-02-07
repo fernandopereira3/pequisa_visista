@@ -1,6 +1,6 @@
 # Pesquisa de Sentenciados - CPPPAC
 
-Este é um aplicativo Streamlit para pesquisar e gerenciar informações sobre sentenciados no Complexo Penitenciário Dr. Paulo César Pacca (CPPPAC). Ele permite pesquisar sentenciados por matrícula ou nome e adicionar matrículas a uma lista para referência.
+Este é um aplicativo Streamlit para pesquisar e gerenciar informações sobre sentenciados. Ele permite pesquisar sentenciados por matrícula ou nome e adicionar matrículas a uma lista para referência.
 
 ## Funcionalidades
 
