@@ -37,7 +37,7 @@ def normalizar_texto(texto):
 
 # Função para buscar sentenciado por matrícula
 def buscar_por_matricula(matricula):
-    matricula_normalizada = re.compile(f".*{campo_pesquisa}.*", re.IGNORECASE)
+    matricula_normalizada = re.compile(f".*{txt_d_pesquisa}.*", re.IGNORECASE)
     consulta_exata = {'matricula': matricula_normalizada}
 
     resultado = list(sentenciados.find(consulta_exata))
@@ -77,36 +77,36 @@ def adicionar_a_lista(matricula):
 tipo_busca = st.radio('Pesquisar por:', ['Matrícula', 'Nome'])
 
 # Campo de entrada dinâmico baseado na escolha
-campo_pesquisa = st.text_input('Digite a informação para pesquisa')
+txt_d_pesquisa = st.text_input('Digite a informação para pesquisa')
 
 # Criando colunas para botões
 col1, col2, col3, col4 = st.columns(4)
 
 # Botão de Pesquisa
 if col1.button('Pesquisar'):
-    if campo_pesquisa:
+    if txt_d_pesquisa:
         if tipo_busca == 'Matrícula':
-            resultados = buscar_por_matricula(campo_pesquisa)
+            resultados = buscar_por_matricula(txt_d_pesquisa)
         else:
-            resultados = buscar_por_nome(campo_pesquisa)
+            resultados = buscar_por_nome(txt_d_pesquisa)
 
         if resultados:
             for sentenciado in resultados:
-                st.write(f"**Nome:** {sentenciado['nome']}")
-                st.write(f"**Matrícula:** {sentenciado['matricula']}")
-                st.write(f"**Pavilhão:** {sentenciado.get('pavilhao', 'N/A')}")
-                #st.markdown("---")  # Linha divisória
+                st.write(f"**Nome:** {sentenciado['nome']} --- **Matr:** {sentenciado['matricula']} --- {sentenciado.get('pavilhao', 'N/A')}")
+                st.markdown('---')
         else:
+            st.warning('Debug')
+            st.write(buscar_por_matricula(txt_d_pesquisa))
             st.warning('Nenhum sentenciado encontrado.')
     else:
         st.warning('Digite um valor para pesquisar.')
 
 # Botão Adicionar à Lista (apenas para matrícula)
 if col2.button('Add matriculas'):
-    if campo_pesquisa != False:
-        adicionar_a_lista(campo_pesquisa)
+    if txt_d_pesquisa != False:
+        adicionar_a_lista(txt_d_pesquisa)
     else:
-        st.write(campo_pesquisa)
+        st.write(txt_d_pesquisa)
         st.warning('Somente matrículas podem ser adicionadas na lista !.')
 
 if col4.button('Limpar Lista'):
@@ -115,7 +115,7 @@ if col4.button('Limpar Lista'):
 
 # Exibição da lista de sentenciados
 if st.session_state['sentenciados_lista']:
-    st.markdown('---')  # Linha divisória
+    #st.markdown('---')  # Linha divisória
     st.subheader('Matrículas na Lista:')
     
     # Exibe os dados como tabela
