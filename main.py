@@ -54,7 +54,6 @@ def buscar_por_nome(nome):
 # Função para adicionar sentenciado à lista
 def adicionar_a_lista(matricula):
     matricula_normalizada = re.compile(f".*{matricula}.*", re.IGNORECASE)
-    # Busca exata no banco para melhor performance
     sentenciado = sentenciados.find_one({'matricula': {'$regex': matricula_normalizada}})
 
     if sentenciado:
@@ -62,7 +61,10 @@ def adicionar_a_lista(matricula):
             st.session_state['sentenciados_lista'].append({
                 'matricula': sentenciado['matricula'],
                 'nome': sentenciado['nome'],
-                'pavilhao': sentenciado.get('pavilhao', 'N/A')
+                'PET': 0,
+                'HOMEM': 0,
+                'MULHER': 0,
+                'CRIANCA': 0,
             })
             st.success(f'Matrícula {sentenciado["matricula"]} adicionada à lista com sucesso!')
         else:
@@ -78,7 +80,7 @@ tipo_busca = st.radio('Pesquisar por:', ['Matrícula', 'Nome'])
 campo_pesquisa = st.text_input('Digite a informação para pesquisa')
 
 # Criando colunas para botões
-col1, col2 = st.columns(2)
+col1, col2, col3, col4 = st.columns(4)
 
 # Botão de Pesquisa
 if col1.button('Pesquisar'):
@@ -93,19 +95,23 @@ if col1.button('Pesquisar'):
                 st.write(f"**Nome:** {sentenciado['nome']}")
                 st.write(f"**Matrícula:** {sentenciado['matricula']}")
                 st.write(f"**Pavilhão:** {sentenciado.get('pavilhao', 'N/A')}")
-                st.markdown("---")  # Linha divisória
+                #st.markdown("---")  # Linha divisória
         else:
             st.warning('Nenhum sentenciado encontrado.')
     else:
         st.warning('Digite um valor para pesquisar.')
 
 # Botão Adicionar à Lista (apenas para matrícula)
-if col2.button('Adicionar matriculas'):
+if col2.button('Add matriculas'):
     if campo_pesquisa != False:
         adicionar_a_lista(campo_pesquisa)
     else:
         st.write(campo_pesquisa)
         st.warning('Somente matrículas podem ser adicionadas na lista !.')
+
+if col4.button('Limpar Lista'):
+    st.session_state['sentenciados_lista'] = []
+    st.success('Lista de sentenciados foi limpa!')
 
 # Exibição da lista de sentenciados
 if st.session_state['sentenciados_lista']:
@@ -115,3 +121,31 @@ if st.session_state['sentenciados_lista']:
     # Exibe os dados como tabela
     df = pd.DataFrame(st.session_state['sentenciados_lista'])
     st.dataframe(df)
+
+    # Multiselect para selecionar matrículas para remover
+    matriculas_para_remover = st.multiselect(
+        'Selecione as matrículas para remover:',
+        [s['matricula'] for s in st.session_state['sentenciados_lista']]
+    )
+
+
+# Botão para remover as matrículas selecionadas
+if col3.button('Remover Matrículas'):
+    if matriculas_para_remover:
+        st.session_state['sentenciados_lista'] = [
+            s for s in st.session_state['sentenciados_lista']
+                if s['matricula'] not in matriculas_para_remover
+                ]
+        st.success('Matrículas removidas com sucesso!')
+    else:
+        st.info('Nenhuma matrícula selecionada para remover.')
+
+
+
+
+# Exibição da lista de sentenciados
+#if st.session_state['sentenciados_lista']:
+#    st.markdown('---')  # Linha divisória
+#    st.subheader('Matrículas na Lista:')
+    
+  
