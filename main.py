@@ -1,17 +1,23 @@
 import streamlit as st
-import pymongo
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 import re
 import pandas as pd
 import unicodedata
+import urllib.parse
 
 # Conexão com o banco de dados
-client = MongoClient('mongodb://localhost:27017/')
+username = urllib.parse.quote_plus('fernandopereira3')
+password = urllib.parse.quote_plus('@Leon02023091')
+url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"
+
+
+client = MongoClient(url, server_api=ServerApi('1'))
 db = client.cpppac
 sentenciados = db.sentenciados
 
-st.title('Lista de Sentenciados')
 
+st.title('Lista para o dia de Visita')
 
 # Inicializa a lista no session_state, se ainda não existir
 if 'sentenciados_lista' not in st.session_state:
@@ -94,7 +100,7 @@ if col1.button('Pesquisar'):
         st.warning('Digite um valor para pesquisar.')
 
 # Botão Adicionar à Lista (apenas para matrícula)
-if col2.button('Adicionar à Lista'):
+if col2.button('Adicionar matriculas'):
     if campo_pesquisa != False:
         adicionar_a_lista(campo_pesquisa)
     else:
