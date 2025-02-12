@@ -28,7 +28,7 @@ jobs:
     - name: Run streamlit
       run: |
          streamlit run main.py
-         \x03
+         killall -9 streamlit
       
     - name: Test with pytest
       run: |
