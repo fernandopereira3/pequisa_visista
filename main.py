@@ -7,15 +7,25 @@ import unicodedata
 import urllib.parse
 
 # Conexão com o banco de dados
-username = urllib.parse.quote_plus('fernandopereira3')
-password = urllib.parse.quote_plus('@Leon02023091')
-url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"
-
-
-client = MongoClient(url, server_api=ServerApi('1'))
-db = client.cpppac
-sentenciados = db.sentenciados
-
+try:
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client.cpppac
+    sentenciados = db.sentenciados
+    st.toast('Conexão com o banco de dados local estabelecida!', icon ='👍')
+except Exception as e:
+    st.error(f"Erro ao conectar ao banco de dados: {e}", icon = '👎')
+#finally:
+#    username = urllib.parse.quote_plus('fernandopereira3')
+#    password = urllib.parse.quote_plus('@Leon02023091')
+#    url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"    
+#    try:
+#        client = MongoClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+#        client.server_info()  # Force connection attempt
+#        db = client.cpppac
+#        sentenciados = db.sentenciados
+#        st.toast('Conexão com o banco de dados remoto estabelecida!', icon ='👍')
+#    except Exception as e:
+#        st.error('Timeout na conexão com o banco de dados remoto. Tente novamente.', icon='👎')
 
 st.title('Lista para o dia de Visita')
 
@@ -39,10 +49,10 @@ def normalizar_texto(texto):
 def buscar_por_matricula(matricula):
     matricula_normalizada = re.compile(f".*{txt_d_pesquisa}.*", re.IGNORECASE)
     consulta_exata = {'matricula': matricula_normalizada}
-
+#{ "<field>": { "$regex": "pattern", "$options": "<options>" } } REGEX DO MONGODB
     resultado = list(sentenciados.find(consulta_exata))
     if not resultado:
-        resultado = list(sentenciados.find({'matricula': {'$regex': matricula_normalizada}}))
+        resultado = list(sentenciados.find({'matricula': {'$regex': matricula_normalizada}}))  
     return resultado
 
 # Função para buscar sentenciado por nome
@@ -55,25 +65,32 @@ def buscar_por_nome(nome):
 def adicionar_a_lista(matricula):
     matricula_normalizada = re.compile(f".*{matricula}.*", re.IGNORECASE)
     sentenciado = sentenciados.find_one({'matricula': {'$regex': matricula_normalizada}})
+    pet = st.number_input('Quantidade de garrafas PET', min_value=0, max_value=10, value=0)
+    homem = st.number_input('Quantidade de HOMENS', min_value=0, max_value=10, value=0)
+    mulher = st.number_input('Quantidade de MULHERES', min_value=0, max_value=10, value=0)
+    crianca = st.number_input('Quantidade de CRIANCAS', min_value=0, max_value=10, value=0)
 
     if sentenciado:
-        if sentenciado['matricula'] not in [s['matricula'] for s in st.session_state['sentenciados_lista']]:
-            st.session_state['sentenciados_lista'].append({
-                'matricula': sentenciado['matricula'],
-                'nome': sentenciado['nome'],
-                'PET': 0,
-                'HOMEM': 0,
-                'MULHER': 0,
-                'CRIANCA': 0,
-            })
-            st.success(f'Matrícula {sentenciado["matricula"]} adicionada à lista com sucesso!')
+        if (homem > 0 or mulher > 0):
+            if sentenciado['matricula'] not in [s['matricula'] for s in st.session_state['sentenciados_lista']]:
+                st.session_state['sentenciados_lista'].append({
+                    'matricula': sentenciado['matricula'],
+                    'nome': sentenciado['nome'],
+                    'PET': pet,
+                    'HOMEM': homem,
+                    'MULHER': mulher,
+                    'CRIANCA': crianca,
+                })
+                st.success(f'Matrícula {sentenciado["matricula"]} adicionada à lista com sucesso!')
+            else:
+                st.info('Esta matrícula já está na lista!')
         else:
-            st.info('Esta matrícula já está na lista!')
+            st.warning('É necessário ter pelo menos um visitante (homem ou mulher) para adicionar à lista!')
     else:
         st.write(sentenciado)
         st.warning('Sentenciado não encontrado! ')
-        
 # Escolha do tipo de busca
+
 tipo_busca = st.radio('Pesquisar por:', ['Matrícula', 'Nome'])
 
 # Campo de entrada dinâmico baseado na escolha
@@ -91,15 +108,17 @@ if col1.button('Pesquisar'):
             resultados = buscar_por_nome(txt_d_pesquisa)
 
         if resultados:
-            for sentenciado in resultados:
-                st.write(f"**Nome:** {sentenciado['nome']} --- **Matr:** {sentenciado['matricula']} --- {sentenciado.get('pavilhao', 'N/A')}")
+            for sentenciados in resultados:
+                st.write(f"**Nome:** {sentenciados['nome']} --- **Matr:** {sentenciados['matricula']} --- {sentenciados.get('pavilhao', 'N/A')}")
                 st.markdown('---')
         else:
             st.warning('Debug')
             st.write(buscar_por_matricula(txt_d_pesquisa))
-            st.warning('Nenhum sentenciado encontrado.')
+            st.write(f'MATRICULA NORMALIZADA {normalizar_matricula(txt_d_pesquisa)}')
+            st.write(list(sentenciados.find({'matricula': {'$regex': txt_d_pesquisa}})))
+            st.warning(f'O sentenciado com {txt_d_pesquisa} não foi encontrado.')
     else:
-        st.warning('Digite um valor para pesquisar.')
+        st.warning('Digite nome ou matricula para pesquisar.')
 
 # Botão Adicionar à Lista (apenas para matrícula)
 if col2.button('Add matriculas'):
@@ -128,7 +147,6 @@ if st.session_state['sentenciados_lista']:
         [s['matricula'] for s in st.session_state['sentenciados_lista']]
     )
 
-
 # Botão para remover as matrículas selecionadas
 if col3.button('Remover Matrículas'):
     if matriculas_para_remover:
@@ -139,13 +157,5 @@ if col3.button('Remover Matrículas'):
         st.success('Matrículas removidas com sucesso!')
     else:
         st.info('Nenhuma matrícula selecionada para remover.')
-
-
-# Workflow para salvar a lista de sentenciado
-
-# Exibição da lista de sentenciados
-#if st.session_state['sentenciados_lista']:
-#    st.markdown('---')  # Linha divisória
-#    st.subheader('Matrículas na Lista:')
     
   
