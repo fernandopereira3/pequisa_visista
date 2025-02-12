@@ -141,7 +141,7 @@ if col3.button('Remover Matrículas'):
         st.info('Nenhuma matrícula selecionada para remover.')
 
 
-# Workflow
+# Workflow para salvar a lista de sentenciados
 
 # Exibição da lista de sentenciados
 #if st.session_state['sentenciados_lista']:
