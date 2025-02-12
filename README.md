@@ -1,73 +1,69 @@
-# Pesquisa de Sentenciados - CPPPAC
+# Lista da Visita
 
-Este é um aplicativo Streamlit para pesquisar e gerenciar informações sobre sentenciados. Ele permite pesquisar sentenciados por matrícula ou nome e adicionar matrículas a uma lista para referência.
+Este projeto Streamlit tem como objetivo auxiliar no controle e organização da lista de visitas. Ele permite pesquisar indivíduos por identificação ou nome, adicionar visitantes à lista de presença, especificar quantidades de itens (PETs, homens, mulheres, crianças) e gerenciar a lista, removendo ou limpando conforme necessário.
 
 ## Funcionalidades
 
-*   **Pesquisa por Matrícula:** Permite pesquisar sentenciados inserindo sua matrícula. A pesquisa normaliza a matrícula removendo pontos e traços para garantir a correspondência.
-*   **Pesquisa por Nome:** Permite pesquisar sentenciados inserindo seu nome. A pesquisa normaliza o nome removendo acentos e convertendo para minúsculas para garantir a correspondência.
-*   **Adicionar à Lista:** Permite adicionar matrículas à uma lista de referência. A lista é persistida usando o `session_state` do Streamlit.
-*   **Visualização da Lista:** Exibe uma lista de matrículas adicionadas, juntamente com seus nomes e pavilhões correspondentes.
-*   **Interface Streamlit:** Interface gráfica interativa construída com Streamlit.
+- **Conexão com o Banco de Dados:**
+    - Estabelece conexão com o banco de dados MongoDB para buscar informações dos indivíduos.
+    - Prioriza a conexão com o banco de dados local (localhost) e, em caso de falha, tenta conectar-se ao banco de dados remoto (MongoDB Atlas).
+    - Exibe mensagens de sucesso ou erro ao conectar-se ao banco de dados.
 
-## Como usar
+- **Interface Streamlit:**
+    - Título principal "Lista da Visita".
+    - Campo de texto para inserir o nome ou identificação do indivíduo a ser pesquisado.
+    - Campos numéricos para especificar a quantidade de visitantes (PETs, homens, mulheres, crianças).
+    - Botões para "Pesquisar", "Adicionar à Lista", "Limpar Lista" e "Remover Identificações".
 
-1.  **Configuração do Ambiente:**
-    *   Certifique-se de ter o Python instalado (versão 3.7 ou superior).
-    *   Instale as dependências usando o pip:
+- **Pesquisa de Indivíduos:**
+    - Permite pesquisar indivíduos por identificação ou nome.
+    - Utiliza expressões regulares para realizar a busca de forma flexível e case-insensitive.
+    - Exibe os resultados da pesquisa, mostrando o nome e identificação do indivíduo.
+    - Emite um aviso caso o indivíduo não seja encontrado.
 
-    ```bash
-    pip install streamlit pymongo pandas unicodedata
-    ```
+- **Gerenciamento da Lista de Visitas:**
+    - Permite adicionar indivíduos à lista de visitas, especificando a quantidade de visitantes (PETs, homens, mulheres, crianças).
+    - Verifica se a identificação já está na lista antes de adicionar, evitando duplicidades.
+    - Exibe uma mensagem de sucesso ao adicionar o indivíduo à lista.
+    - Exibe a lista de indivíduos em um dataframe Streamlit.
+    - Permite remover identificações específicas da lista através de um multiselect.
+    - Permite limpar a lista completamente.
 
-2.  **Configuração do Banco de Dados MongoDB:**
-    *   Certifique-se de ter o MongoDB instalado e rodando na sua máquina.
-    *   O aplicativo se conecta ao MongoDB na porta padrão (27017) no localhost. Se você estiver usando uma configuração diferente, ajuste a string de conexão no código.
-    *   Crie um banco de dados chamado `cpppac` e uma collection chamada `sentenciados`.
-    *   Insira os dados dos sentenciados na collection `sentenciados`. Cada documento deve ter os campos `matricula` e `nome`. O campo `pavilhao` é opcional.
+## Como Usar
 
-3.  **Execução do Aplicativo:**
-    *   Navegue até o diretório onde você salvou o arquivo `main.py`.
-    *   Execute o aplicativo Streamlit usando o seguinte comando:
+1.  **Conecte-se ao Banco de Dados:**
+      - Certifique-se de que o banco de dados MongoDB esteja em execução localmente (mongodb://localhost:27017/).
+      - Caso a conexão local falhe, o script tentará se conectar ao banco de dados remoto (MongoDB Atlas).  As credenciais de acesso ao banco remoto estão comentadas no código, sendo necessário descomentar e configurar as variáveis `username` e `password` com as credenciais corretas.
 
-    ```bash
-    streamlit run main.py
-    ```
+2.  **Execute o Script Streamlit:**
+    
+      streamlit run main.py
+    
 
-    *   O Streamlit abrirá o aplicativo em seu navegador web.
+3.  **Utilize a Interface:**
+      - Insira o nome ou identificação do indivíduo no campo de texto.
+      - Especifique a quantidade de visitantes (PETs, homens, mulheres, crianças).
+      - Clique no botão "Pesquisar" para buscar o indivíduo.
+      - Clique no botão "Adicionar à Lista" para adicionar o indivíduo à lista de visitas.
+      - Utilize o multiselect e o botão "Remover Identificações" para remover indivíduos específicos da lista.
+      - Clique no botão "Limpar Lista" para remover todos os indivíduos da lista.
 
-4.  **Usando o Aplicativo:**
-    *   Na barra lateral, escolha o tipo de pesquisa (Matrícula ou Nome).
-    *   Insira a informação para pesquisa no campo de texto.
-    *   Clique no botão "Pesquisar" para exibir os resultados.
-    *   Se você pesquisou por matrícula, pode clicar no botão "Adicionar à Lista" para adicionar a matrícula à lista de referência.
-    *   A lista de matrículas adicionadas é exibida na parte inferior da página.
+## Requisitos
 
-## Estrutura do Código
+- Python 3.6+
+- Streamlit
+- pymongo
+- pandas
+- re
+- unicodedata
+- urllib.parse
 
-*   `main.py`: Contém o código principal do aplicativo Streamlit.
-    *   Conecta-se ao banco de dados MongoDB.
-    *   Define as funções para normalizar matrículas e nomes.
-    *   Define as funções para pesquisar sentenciados por matrícula ou nome.
-    *   Define a função para adicionar matrículas à lista.
-    *   Cria a interface do usuário com Streamlit.
+## Instalação
 
-## Dependências
 
-*   `streamlit`: Para criar a interface do usuário.
-*   `pymongo`: Para conectar ao banco de dados MongoDB.
-*   `pandas`: Para exibir a lista de matrículas como uma tabela.
-*   `re`: Para usar expressões regulares para normalizar matrículas e nomes.
-*   `unicodedata`: Para remover acentos dos nomes.
-
-## Próximos Passos
-
-*   Adicionar funcionalidade para remover matrículas da lista.
-*   Implementar paginação para exibir grandes quantidades de resultados de pesquisa.
-*   Adicionar mais campos de pesquisa (por exemplo, data de nascimento, crime).
-*   Melhorar a interface do usuário.
-*   Implementar autenticação e autorização.
+pip install streamlit pymongo pandas
 
 ## Contribuição
 
 Contribuições são bem-vindas! Sinta-se à vontade para enviar pull requests com melhorias e correções de bugs.
+
