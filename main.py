@@ -7,8 +7,8 @@ import unicodedata
 import urllib.parse
 
 # Conexão com o banco de dados
-username = urllib.parse.quote_plus('**************')
-password = urllib.parse.quote_plus('**************')
+username = urllib.parse.quote_plus('fernandopereira3')
+password = urllib.parse.quote_plus('@Leon02023091')
 url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"
 
 
