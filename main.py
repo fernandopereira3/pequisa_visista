@@ -5,27 +5,30 @@ import re
 import pandas as pd
 import unicodedata
 import urllib.parse
-
-# Conexão com o banco de dados
+# Conexão com o banco de dados remoto
 try:
-    client = MongoClient('mongodb://localhost:27017/')
+    username = urllib.parse.quote_plus('fernandopereira3')
+    password = urllib.parse.quote_plus('@Leon02023091')
+    url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"
+    client = MongoClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+    client.server_info()  # Force connection attempt
     db = client.cpppac
     sentenciados = db.sentenciados
-    st.toast('Conexão com o banco de dados local estabelecida!', icon ='👍')
+    st.toast('Conexão com o banco de dados remoto estabelecida!', icon ='👍')
+    conexao_remota = True
 except Exception as e:
-    st.error(f"Erro ao conectar ao banco de dados: {e}", icon = '👎')
-#finally:
-#    username = urllib.parse.quote_plus('fernandopereira3')
-#    password = urllib.parse.quote_plus('@Leon02023091')
-#    url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"    
-#    try:
-#        client = MongoClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
-#        client.server_info()  # Force connection attempt
-#        db = client.cpppac
-#        sentenciados = db.sentenciados
-#        st.toast('Conexão com o banco de dados remoto estabelecida!', icon ='👍')
-#    except Exception as e:
-#        st.error('Timeout na conexão com o banco de dados remoto. Tente novamente.', icon='👎')
+        st.error('Timeout na conexão com o banco de dados remoto. Tente novamente.', icon='👎')
+        conexao_local = False
+
+# Verifica se a conexão com o banco de dados remoto foi bem-sucedida se não, tenta a conexão local
+if not conexao_remota:
+    try:
+        client = MongoClient('mongodb://localhost:27017/')
+        db = client.cpppac
+        sentenciados = db.sentenciados
+        st.toast('Conexão com o banco de dados local estabelecida!', icon ='👍')
+    except Exception as e:
+        st.error(f"Erro ao conectar ao banco de dados local: {e}", icon = '👎')
 
 st.title('Lista da Visita')
 
@@ -89,9 +92,6 @@ def adicionar_a_lista(matricula, pet, homem, mulher, crianca):
         df = pd.DataFrame(st.session_state['sentenciados_lista'])
         st.dataframe(df)
 
-# Escolha do tipo de busca
-#tipo_busca = st.radio('Pesquisar por:', ['Matrícula', 'Nome'])
-
 
 coluna = st.columns(1)
 txt_d_pesquisa = coluna[0].text_input('Digite a quem esta procurando')
@@ -124,7 +124,7 @@ if col1.button('Pesquisar'):
         st.warning('Digite nome ou matricula para pesquisar.')
 
 # Botão Adicionar à Lista (apenas para matrícula)
-if col2.button('Add matriculas'):
+if col2.button('ADICIONAR'):
     if normalizar_matricula(txt_d_pesquisa):
         adicionar_a_lista(txt_d_pesquisa, pet, homem, mulher, crianca)
     else:
