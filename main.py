@@ -17,8 +17,8 @@ try:
     st.toast('Conexão com o banco de dados remoto estabelecida!', icon ='👍')
     conexao_remota = True
 except Exception as e:
-        st.error('Timeout na conexão com o banco de dados remoto. Tente novamente.', icon='👎')
-        conexao_local = False
+        st.toast('Timeout na conexão com o banco de dados remoto. Tente novamente.', icon='👎')
+        conexao_remota = False
 
 # Verifica se a conexão com o banco de dados remoto foi bem-sucedida se não, tenta a conexão local
 if not conexao_remota:
