@@ -6,56 +6,29 @@ import pandas as pd
 import unicodedata
 import urllib.parse
 # Conexão com o banco de dados remoto
-import streamlit as st
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
-import re
-import pandas as pd
-import unicodedata
-import urllib.parse
-
-def conectar_banco_de_dados():
-    """
-    Tenta conectar ao banco de dados remoto e, se falhar, tenta o banco de dados local.
-    Retorna o banco de dados e um booleano indicando se a conexão foi bem-sucedida.
-    """
-    conexao_remota = False
-    db = None
-    try:
-        username = urllib.parse.quote_plus('fernandopereira3')
-        password = urllib.parse.quote_plus('@Leon02023091')
-        url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"
-        client = MongoClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
-        client.server_info()  # Force connection attempt
-        db = client.cpppac
-        sentenciados = db.sentenciados
-        st.toast('Conexão com o banco de dados remoto estabelecida!', icon='👍')
-        conexao_remota = True
-        return db, conexao_remota
-    except Exception as e:
-        st.toast('Timeout na conexão com o banco de dados remoto. Tentando conexão local...', icon='👎')
+try:
+    username = urllib.parse.quote_plus('fernandopereira3')
+    password = urllib.parse.quote_plus('@Leon02023091')
+    url = f"mongodb+srv://{username}:{password}@pesquisavisita.2h6au.mongodb.net/?retryWrites=true&w=majority&appName=pesquisaVisita"
+    client = MongoClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+    client.server_info()  # Force connection attempt
+    db = client.cpppac
+    sentenciados = db.sentenciados
+    st.toast('Conexão com o banco de dados remoto estabelecida!', icon ='👍')
+    conexao_remota = True
+except Exception as e:
+        st.toast('Timeout na conexão com o banco de dados remoto. Tente novamente.', icon='👎')
         conexao_remota = False
 
-    # Tenta a conexão local se a remota falhar
-    if not conexao_remota:
-        try:
-            client = MongoClient('mongodb://localhost:27017/')
-            db = client.cpppac
-            sentenciados = db.sentenciados
-            st.toast('Conexão com o banco de dados local estabelecida!', icon='👍')
-            return db, True  # Retorna True para indicar sucesso na conexão local
-        except Exception as e:
-            st.error(f"Erro ao conectar ao banco de dados local: {e}", icon='👎')
-            return None, False  # Retorna False para indicar falha na conexão
-
-try:
-    db, conexao_status = conectar_banco_de_dados()
-    if db:
+# Verifica se a conexão com o banco de dados remoto foi bem-sucedida se não, tenta a conexão local
+if not conexao_remota:
+    try:
+        client = MongoClient('mongodb://localhost:27017/')
+        db = client.cpppac
         sentenciados = db.sentenciados
-    else:
-        st.error("Não foi possível conectar ao banco de dados.", icon='👎')
-except Exception as e:
-    st.error(f"Erro ao conectar ao banco de dados: {e}", icon='👎')
+        st.toast('Conexão com o banco de dados local estabelecida!', icon ='👍')
+    except Exception as e:
+        st.error(f"Erro ao conectar ao banco de dados local: {e}", icon = '👎')
 
 st.title('Lista da Visita')
 
